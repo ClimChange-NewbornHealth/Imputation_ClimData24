@@ -1,6 +1,3 @@
-
-A continuación se presenta una plantilla de ejemplo. Por favor realiza una copia y cambia los parámetros respectivos.
-
 #  From Missing Values to Predictive Power: Assessing Classical and Deep Learning Imputation Methods for Environmental Health Data
 
 ![GitHub Repo stars](https://img.shields.io/github/stars/ClimChange-NewbornHealth/CIIIA-ClimateBirthWeightAnalysis)
