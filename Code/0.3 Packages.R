@@ -33,7 +33,7 @@ install_load(c("rio",
 
 # Imputation packages 
 
-install_load(c(
-  
+install_load(c("mice",
+               "VIM" 
                ))
 
