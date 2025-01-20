@@ -15,15 +15,27 @@ data_out <- "Data/Output/"
 files <- list.files(paste0(data_inp, "PM25"), full.names = TRUE)
 files
 
+# Explorer files
+data_pm25 <- set_names(files, nm = sub("_.*", "", basename(files))) |> 
+  imap(~ {    
+    s <- sub("_.*", "", basename(.y))
+    import(.x, delim=";", na = c("", "NA")) |> 
+    janitor::clean_names() |>
+    mutate(station=s)|> 
+    mutate(across(where(is.character), ~ na_if(.x, ""))) 
+  })
+
 data_pm25 <- set_names(files, nm = sub("_.*", "", basename(files))) |> 
   imap(~ {
     
     s <- sub("_.*", "", basename(.y))
 
-    import(.x, delim=";") |> 
+    import(.x, delim=";", na = c("", "NA")) |> 
     janitor::clean_names() |>
     mutate(station=s) |>  
-    mutate(pm25=as.numeric(registros_validados)) |> 
+    mutate(across(where(is.character), ~ na_if(.x, ""))) |> 
+    mutate(pm25 = str_replace(registros_validados, pattern = ",", replacement = ".")) |> 
+    mutate(pm25=as.numeric(pm25)) |> 
     adjust_dates() |> 
     mutate(
       year=year(date),
@@ -34,6 +46,10 @@ data_pm25 <- set_names(files, nm = sub("_.*", "", basename(files))) |>
       filter(year>=2000 & year<=2023)
   }
 )
+
+glimpse(data_pm25)
+
+map(data_pm25, ~ map_df(.x, ~ sum(is.na(.)), .id = "variable"))
 
 data_pm25 <- bind_rows(data_pm25)
 
@@ -46,10 +62,12 @@ data_o3 <- set_names(files, nm = sub("_.*", "", basename(files))) |>
     
     s <- sub("_.*", "", basename(.y))
 
-    import(.x, delim=";") |> 
+    import(.x, delim=";", na = c("", "NA")) |> 
     janitor::clean_names() |>
     mutate(station=s) |>  
-    mutate(o3=as.numeric(registros_validados)) |> 
+    mutate(across(where(is.character), ~ na_if(.x, ""))) |> 
+    mutate(o3 = str_replace(registros_validados, pattern = ",", replacement = ".")) |> 
+    mutate(o3 = as.numeric(o3)) |> 
     adjust_dates() |> 
     mutate(
       year=year(date),
@@ -60,6 +78,8 @@ data_o3 <- set_names(files, nm = sub("_.*", "", basename(files))) |>
       filter(year>=2000 & year<=2023)
   }
 )
+
+map(data_o3, ~ map_df(.x, ~ sum(is.na(.)), .id = "variable"))
 
 data_o3 <- bind_rows(data_o3)
 
@@ -74,10 +94,12 @@ data_pm10 <- set_names(files, nm = sub("_.*", "", basename(files))) |>
     
     s <- sub("_.*", "", basename(.y))
 
-    import(.x, delim=";") |> 
+    import(.x, delim=";", na = c("", "NA")) |> 
     janitor::clean_names() |>
     mutate(station=s) |>  
-    mutate(pm10=as.numeric(registros_validados)) |> 
+    mutate(across(where(is.character), ~ na_if(.x, ""))) |> 
+    mutate(pm10= str_replace(registros_validados, pattern = ",", replacement = ".")) |> 
+    mutate(pm10 = as.numeric(pm10)) |> 
     adjust_dates() |> 
     mutate(
       year=year(date),
@@ -89,9 +111,11 @@ data_pm10 <- set_names(files, nm = sub("_.*", "", basename(files))) |>
   }
 )
 
+map(data_pm10, ~ map_df(.x, ~ sum(is.na(.)), .id = "variable"))
+
 data_pm10 <- bind_rows(data_pm10)
 
-### RHUM
+### HUM
 
 files <- list.files(paste0(data_inp, "RHUM"), full.names = TRUE)
 
@@ -100,10 +124,12 @@ data_hum <- set_names(files, nm = sub("_.*", "", basename(files))) |>
     
     s <- sub("_.*", "", basename(.y))
 
-    import(.x, delim=";") |> 
+    import(.x, delim=";", na = c("", "NA")) |> 
     janitor::clean_names() |>
     mutate(station=s) |>  
-    mutate(hum=as.numeric(v3)) |> 
+    mutate(across(where(is.character), ~ na_if(.x, ""))) |> 
+    mutate(hum = str_replace(v3, pattern = ",", replacement = ".")) |> 
+    mutate(hum = as.numeric(hum)) |> 
     adjust_dates() |> 
     mutate(
       year=year(date),
@@ -114,6 +140,8 @@ data_hum <- set_names(files, nm = sub("_.*", "", basename(files))) |>
       filter(year>=2000 & year<=2023)
   }
 )
+
+map(data_hum, ~ map_df(.x, ~ sum(is.na(.)), .id = "variable"))
 
 data_hum <- bind_rows(data_hum)
 
@@ -126,10 +154,12 @@ data_temp <- set_names(files, nm = sub("_.*", "", basename(files))) |>
     
     s <- sub("_.*", "", basename(.y))
 
-    import(.x, delim=";") |> 
+    import(.x, delim=";", na = c("", "NA")) |> 
     janitor::clean_names() |>
     mutate(station=s) |>  
-    mutate(temp=as.numeric(v3)) |> 
+    mutate(across(where(is.character), ~ na_if(.x, ""))) |> 
+    mutate(temp = str_replace(v3, pattern = ",", replacement = ".")) |> 
+    mutate(temp = as.numeric(temp)) |> 
     adjust_dates() |> 
     mutate(
       year=year(date),
@@ -140,6 +170,8 @@ data_temp <- set_names(files, nm = sub("_.*", "", basename(files))) |>
       filter(year>=2000 & year<=2023)
   }
 )
+
+map(data_temp, ~ map_df(.x, ~ sum(is.na(.)), .id = "variable"))
 
 data_temp <- bind_rows(data_temp)
 
@@ -152,10 +184,12 @@ data_wspd <- set_names(files, nm = sub("_.*", "", basename(files))) |>
     
     s <- sub("_.*", "", basename(.y))
 
-    import(.x, delim=";") |> 
+    import(.x, delim=";", na = c("", "NA")) |> 
     janitor::clean_names() |>
     mutate(station=s) |>  
-    mutate(wspd=as.numeric(v3)) |> 
+    mutate(across(where(is.character), ~ na_if(.x, ""))) |> 
+    mutate(wspd = str_replace(v3, pattern = ",", replacement = ".")) |> 
+    mutate(wspd = as.numeric(wspd)) |> 
     adjust_dates() |> 
     mutate(
       year=year(date),
@@ -167,16 +201,61 @@ data_wspd <- set_names(files, nm = sub("_.*", "", basename(files))) |>
   }
 )
 
+map(data_wspd, ~ map_df(.x, ~ sum(is.na(.)), .id = "variable"))
+
 data_wspd <- bind_rows(data_wspd)
  
 
 # Join all data ---------
-full_data <- data_pm25 |> 
-  full_join(select(data_o3, station, datetime, o3), by=c("station", "datetime")) |> 
-  full_join(select(data_pm10, station, datetime, pm10), by=c("station", "datetime")) |> 
-  full_join(select(data_hum, station, datetime, hum), by=c("station", "datetime")) |> 
-  full_join(select(data_temp, station, datetime, temp), by=c("station", "datetime")) |> 
-  full_join(select(data_wspd, station, datetime, wspd), by=c("station", "datetime"))
+
+stations <- unique(data_pm25$station)
+
+# Grid with time values
+
+attr(data_pm25$datetime, "tzone")
+attr(data_o3$datetime, "tzone")
+attr(data_pm10$datetime, "tzone")
+attr(data_hum$datetime, "tzone")
+attr(data_temp$datetime, "tzone")
+attr(data_wspd$datetime, "tzone")
+
+full_datetime_series <- expand_grid(
+  station = unique(stations),
+  datetime = seq.POSIXt(
+    from = as.POSIXct("2000-01-01 00:00:00", tz = "UTC"),
+    to = as.POSIXct("2023-12-31 23:00:00", tz = "UTC"),
+    by = "hour"
+  )
+)
+
+data_pm25 <- data_pm25 %>%
+  mutate(datetime = force_tz(datetime, tzone = "UTC"))
+
+data_o3 <- data_o3 %>%
+  mutate(datetime = force_tz(datetime, tzone = "UTC"))
+
+data_pm10 <- data_pm10 %>%
+  mutate(datetime = force_tz(datetime, tzone = "UTC"))
+
+data_hum <- data_hum %>%
+  mutate(datetime = force_tz(datetime, tzone = "UTC"))
+
+data_temp <- data_temp %>%
+  mutate(datetime = force_tz(datetime, tzone = "UTC"))
+
+data_wspd <- data_wspd %>%
+  mutate(datetime = force_tz(datetime, tzone = "UTC"))
+
+
+attr(full_datetime_series$datetime, "tzone")
+
+full_data <- full_datetime_series |> 
+  left_join(select(data_pm25, station, datetime, pm25), by=c("station", "datetime")) |> 
+  left_join(select(data_o3, station, datetime, o3), by=c("station", "datetime")) |> 
+  left_join(select(data_pm10, station, datetime, pm10), by=c("station", "datetime")) |> 
+  left_join(select(data_hum, station, datetime, hum), by=c("station", "datetime")) |> 
+  left_join(select(data_temp, station, datetime, temp), by=c("station", "datetime")) |> 
+  left_join(select(data_wspd, station, datetime, wspd), by=c("station", "datetime"))
 
 glimpse(full_data)
 summary(full_data)
@@ -191,3 +270,4 @@ save(data_temp, file=paste0(data_out, "series_temp_2000_2023", ".RData"))
 
 # Save complete data 
 save(full_data, file=paste0(data_out, "series_full_2000_2023", ".RData"))
+

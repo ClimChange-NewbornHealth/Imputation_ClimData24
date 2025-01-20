@@ -1,0 +1,5 @@
+load("/Users/jd/Library/CloudStorage/OneDrive-UniversidadCatólicadeChile/ANID Iniciación_2024_2027/Imputation_AmbientalData_2024/Imputation_ClimData24/Data/Output/series_full_2000_2023.RData")
+load("/Users/jd/Library/CloudStorage/OneDrive-UniversidadCatólicadeChile/ANID Iniciación_2024_2027/Imputation_AmbientalData_2024/Imputation_ClimData24/Data/Output/series_pm10_2000_2023.RData")
+str
+ls()
+str(data_pm10)

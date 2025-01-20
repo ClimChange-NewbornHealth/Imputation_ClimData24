@@ -51,6 +51,7 @@ adjust_dates <- function(df) {
   df %>%
     mutate(
       # Convertir FECHA a formato de fecha correcta asumiendo que YY es desde 2000 hacia adelante
+      date = ifelse(nchar(fecha_yymmdd) == 6, ymd(paste0(20, sprintf("%06d", fecha_yymmdd))), NA),
       date = ymd(paste0(20, sprintf("%06d", fecha_yymmdd))),  # Asegurar que FECHA tiene 6 dígitos y agregar "20" para años 2000 en adelante
       
       # Convertir HORA al formato adecuado y unirlo con FECHA

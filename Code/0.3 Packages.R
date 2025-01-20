@@ -26,7 +26,9 @@ install_load(c("rio",
                "ggstatsplot",
                "tidymodels",
                "knitr", 
-               "kableExtra"
+               "kableExtra",
+               "writexl",
+               "RColorBrewer"
                ))
 
 # Imputation packages 
