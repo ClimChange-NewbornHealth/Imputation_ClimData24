@@ -260,7 +260,31 @@ full_data <- full_datetime_series |>
 glimpse(full_data)
 summary(full_data)
 
-# Save data
+# New variables ---------
+
+# Time variables
+full_data <- full_data |> 
+  mutate(
+    year = year(datetime),
+    month = month(datetime),
+    month_name = month(datetime, label = TRUE, abbr = FALSE, locale = "en_US"), 
+    day = day(datetime),
+    hour = hour(datetime),
+    season = case_when(
+      month %in% c(12, 1, 2) ~ "Summer",
+      month %in% c(3, 4, 5) ~ "Fall",
+      month %in% c(6, 7, 8) ~ "Winter",
+      month %in% c(9, 10, 11) ~ "Spring"
+    ),
+    quarter = paste0("Q", quarter(datetime)), 
+    semester = paste0("S", if_else(quarter(datetime) %in% c(1, 2), 1, 2)) 
+  ) |> 
+  relocate(year, month, month_name, day, hour, season, quarter, semester, .after=datetime)
+
+
+glimpse(full_data)
+
+# Save all data ---------
 save(data_pm25, file=paste0(data_out, "series_pm25_2000_2023", ".RData"))
 save(data_o3, file=paste0(data_out, "series_o3_2000_2023", ".RData"))
 save(data_pm10, file=paste0(data_out, "series_pm10_2000_2023", ".RData"))
