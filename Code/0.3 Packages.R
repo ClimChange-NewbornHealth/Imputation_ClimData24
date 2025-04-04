@@ -28,7 +28,11 @@ install_load(c("rio",
                "knitr", 
                "kableExtra",
                "writexl",
-               "RColorBrewer"
+               "RColorBrewer",
+               "ComplexUpset",
+               "ggpubr",
+               "GGally",
+               "rnaturalearth"
                ))
 
 # Imputation packages 

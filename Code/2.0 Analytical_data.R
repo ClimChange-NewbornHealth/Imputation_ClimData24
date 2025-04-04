@@ -71,7 +71,9 @@ series <- series %>%
   mutate(
     station = recode(station, !!!name_station),
     station_fct = factor(station, levels = sort(unique(station))),
-    station_id = str_pad(as.integer(fct_inorder(station_fct)), width = 2, pad = "0")
+    station_id = str_pad(as.integer(fct_inorder(station_fct)), width = 2, pad = "0"),
+    station_id = paste0("S", station_id), 
+    station_id = factor(station_id)
   ) |> 
   relocate(station_id, station_fct)
 
@@ -86,7 +88,6 @@ coors_geo <- tibble(
   long = c(-70.7196, -70.7510, -70.6674, -70.6412, -70.6032, -70.5381,
                 -70.6601, -70.7681, -70.5754, -70.9277, -70.7294)
 )
-
 
 series <- series |> 
   left_join(coors_geo, by="station") |> 

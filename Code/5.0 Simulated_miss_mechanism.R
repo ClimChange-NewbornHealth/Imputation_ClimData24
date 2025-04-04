@@ -40,7 +40,6 @@ date_series |>
   arrange(desc(non_missing))
 
 
-
 # Función para introducir valores faltantes en una columna específica
 introduce_missingness <- function(df, column, mechanism, percentage, dependent_col = NULL) {
   n <- nrow(df)
