@@ -95,5 +95,46 @@ series <- series |>
 
 glimpse(series)
 
+## Filter extreme values and create log transformation ----
+
+# Values with contaminant equal to 0 replace with NA and apply Natural log
+series <- series |> 
+  mutate(pm25 = if_else(pm25==0, NA_real_, pm25)) |> 
+  mutate(pm10 = if_else(pm10==0, NA_real_, pm10)) |> 
+  mutate(o3 = if_else(o3==0, NA_real_, o3)) |> 
+  mutate(wspd = if_else(wspd==0, NA_real_, pm25)) |> 
+  mutate(log_pm25 = log(pm25)) |> 
+  mutate(log_pm10 = log(pm10)) |> 
+  mutate(log_o3 = log(o3)) |> 
+  mutate(log_wspd = log(wspd))
+
+# Extreme reference
+p1_log_pm25 <- quantile(series$log_pm25, probs=0.01, na.rm = TRUE)
+p99_log_pm25 <- quantile(series$log_pm25, probs=0.99, na.rm = TRUE)
+
+p1_log_pm10 <- quantile(series$log_pm10, probs=0.01, na.rm = TRUE)
+p99_log_pm10 <- quantile(series$log_pm10, probs=0.99, na.rm = TRUE)
+
+p1_log_o3 <- quantile(series$log_o3, probs=0.01, na.rm = TRUE)
+p99_log_o3 <- quantile(series$log_o3, probs=0.99, na.rm = TRUE)
+
+p1_log_wspd <- quantile(series$log_wspd, probs=0.01, na.rm = TRUE)
+p99_log_wspd <- quantile(series$log_wspd, probs=0.99, na.rm = TRUE)
+
+# Replace extremes values with NA
+series <- series |> 
+  mutate(
+    log_pm25 = if_else(log_pm25 < p1_log_pm25 | log_pm25 > p99_log_pm25, NA_real_, log_pm25),
+    log_pm10 = if_else(log_pm10 < p1_log_pm10 | log_pm10 > p99_log_pm10, NA_real_, log_pm10),
+    log_o3   = if_else(log_o3   < p1_log_o3   | log_o3   > p99_log_o3,   NA_real_, log_o3),
+    log_wspd = if_else(log_wspd < p1_log_wspd | log_wspd > p99_log_wspd, NA_real_, log_wspd)
+  ) |> 
+  mutate(
+    pm25 = if_else(is.na(log_pm25), NA, pm25),
+    pm10 = if_else(is.na(log_pm10), NA, pm10),
+    o3 = if_else(is.na(log_o3), NA, o3),
+    wspd = if_else(is.na(log_wspd), NA, wspd)
+  ) 
+
 # Save complete data 
 save(series, file=paste0(data_out, "analytical_series_full_2000_2023", ".RData"))
