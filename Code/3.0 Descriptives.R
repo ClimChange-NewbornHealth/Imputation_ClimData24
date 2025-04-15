@@ -33,7 +33,7 @@ date_series <- series |>
     group_by(station_id, year, month, day) |>
     summarise(
       across(
-        starts_with("pm") | starts_with("o") | starts_with("hum") | starts_with("temp") | starts_with("wspd"),
+        starts_with("pm") | starts_with("o") | starts_with("hum") | starts_with("temp") | starts_with("wspd") | starts_with("log_"),
         ~ ifelse(sum(!is.na(.x)) >= 12, mean(.x, na.rm = TRUE), NA),
         .names = "daily_{col}"
       ),
@@ -60,10 +60,15 @@ data_long <- date_series |>
     contaminant == "daily_hum"   ~ "Humidity",
     contaminant == "daily_temp"  ~ "Temperature",
     contaminant == "daily_wspd"  ~ "Wind Speed",
+    contaminant == "daily_log_pm25"  ~ "PM2.5 (log)",
+    contaminant == "daily_log_pm10"  ~ "PM10 (log)",
+    contaminant == "daily_log_o3"    ~ "Ozone (log)",
+    contaminant == "daily_log_wspd"  ~ "Wind Speed (log)",
     TRUE                        ~ contaminant
   )) |> 
   mutate(contaminant = factor(contaminant, 
-                                levels = c("PM2.5", "Ozone", "PM10", "Humidity", "Temperature", "Wind Speed")))  
+                                levels = c("PM2.5", "Ozone", "PM10", "Humidity", "Temperature", "Wind Speed",
+                                           "PM2.5 (log)", "Ozone (log)", "PM10 (log)", "Wind Speed (log)")))  
 
 glimpse(data_long)
 summary(data_long)
