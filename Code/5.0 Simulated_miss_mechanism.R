@@ -21,8 +21,8 @@ find_best_station_year <- function(df, variable) {
     filter(!is.na(.data[[variable]])) |>
     group_by(station, year) |>
     summarise(non_missing = n(), .groups = "drop") |>
-    arrange(desc(non_missing)) |>
-    slice(1)
+    arrange(desc(non_missing)) #|>
+    #slice(1)
 }
 
 date_series |>

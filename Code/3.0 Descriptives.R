@@ -87,7 +87,8 @@ map(hour_thresholds, missing_series)
 
 ## Descriptive table ----
 
-vars <- c("daily_pm25", "daily_pm10", "daily_o3", "daily_hum", "daily_temp", "daily_wspd")
+vars <- c("daily_pm25", "daily_pm10", "daily_o3", "daily_hum", "daily_temp", "daily_wspd", 
+          "daily_log_pm25", "daily_log_pm10", "daily_log_o3", "daily_log_wspd")
 
 table_des <- date_series |>
   select(stat_aux, all_of(vars)) |>
@@ -105,14 +106,11 @@ table_des_all <- date_series |>
   summarise(short_des(value), .groups = "drop") |>
   pivot_longer(cols = N:max, names_to = "stat", values_to = "value") |>
   mutate(stat_aux = "All") |>
-  pivot_wider(names_from = stat_aux, values_from = value)
+  pivot_wider(names_from = stat_aux, values_from = value) |> 
+  pivot_wider(names_from = var, values_from = All)
 
-table_des <- table_des_all |>
-  bind_cols(table_des |> select(-var, -stat)) |>
-  relocate(var, stat) |>
-  arrange(var, stat)
-
-write_xlsx(table_des, "Output/Descriptives/Descriptives_stats.xlsx")
+write_xlsx(table_des, "Output/Descriptives/Descriptives_stats_station.xlsx")
+write_xlsx(table_des_all, "Output/Descriptives/Descriptives_stats_allStation.xlsx")
 
 ## Missing values across time ----
 
@@ -151,35 +149,46 @@ ggsave(
 
 ## Relationship covariates ----
 
+pretty_names_cor <- c(
+  daily_pm25 = "PM2.5",
+  daily_pm10 = "PM10",
+  daily_o3   = "Ozone",
+  daily_hum  = "Humidity",
+  daily_temp = "Temperature",
+  daily_wspd = "Wind Speed",
+  daily_log_pm25 = "PM2.5 (log)",
+  daily_log_pm10 = "PM10 (log)",
+  daily_log_o3 = "Ozone (log)",
+  daily_log_wspd = "Wind Speed (log)"
+)
+
 data_cor <- date_series |>
   select(all_of(vars)) |>
   drop_na()
 
-my_smooth <- function(data, mapping, ...) {
-  ggplot(data = data, mapping = mapping) +
-    geom_point(color = I("gray40"), alpha=0.5, size=0.10) + 
-    geom_smooth(method = "lm", color = I("blue"), ...)
-}
-
-scatter_matrix <- ggpairs(data_cor, method = "pearson",
-        lower = list(continuous=my_smooth),
-        diag = list(continuous = wrap("barDiag", bins = 20, fill = "black", color="gray90", alpha=0.25)),
-        columnLabels = pretty_names
-      ) +
+scatter_matrix <- ggpairs(
+  data_cor,
+  lower = list(continuous = my_smooth),
+  diag  = list(continuous = wrap("barDiag", bins = 20, fill = "black", color = "gray90", alpha = 0.25)),
+  upper = list(continuous = my_cor),  # Llamamos a la función personalizada
+  columnLabels = pretty_names_cor
+) +
   theme_light() +
-  theme(axis.text = element_text(size=6),
-        strip.background = element_rect(fill="white", color="black"), 
-        strip.text = element_text(colour="black"),
-        panel.grid = element_blank())
+  theme(
+    axis.text         = element_text(size = 6),
+    strip.background  = element_rect(fill = "white", color = "black"),
+    strip.text        = element_text(colour = "black"),
+    panel.grid        = element_blank()
+)
 
-scatter_matrix 
+scatter_matrix
 
 ggsave(
   scatter_matrix,
   filename = paste0("Output/Descriptives/Scatter_variables", ".png"), 
   res = 300,
-  width = 20,
-  height = 15,
+  width = 25,
+  height = 23,
   units = 'cm',
   scaling = 0.9,
   device = ragg::agg_png
@@ -192,7 +201,7 @@ for (s in all_stations[-1]) {
   
   data_cor <- date_series |>
     filter(as.character(stat_aux) == s) |>
-    select(all_of(names(pretty_names))) |>
+    select(all_of(names(pretty_names_cor))) |>
     drop_na()
 
   if (nrow(data_cor) < 10) next  # Saltar si hay muy pocos datos
@@ -200,17 +209,17 @@ for (s in all_stations[-1]) {
   scatter_matrix <- ggpairs(
     data_cor,
     lower = list(continuous = my_smooth),
-    diag = list(continuous = wrap("barDiag", bins = 20, fill = "black", color = "gray90", alpha = 0.25)),
-    columnLabels = pretty_names
+    diag  = list(continuous = wrap("barDiag", bins = 20, fill = "black", color = "gray90", alpha = 0.25)),
+    upper = list(continuous = my_cor),  # Llamamos a la función personalizada
+    columnLabels = pretty_names_cor
   ) +
-    labs(title = s) +
     theme_light() +
     theme(
-      axis.text = element_text(size = 6),
-      strip.background = element_rect(fill = "white", color = "black"),
-      strip.text = element_text(colour = "black"),
-      panel.grid = element_blank()
-    )
+      axis.text         = element_text(size = 6),
+      strip.background  = element_rect(fill = "white", color = "black"),
+      strip.text        = element_text(colour = "black"),
+      panel.grid        = element_blank()
+  )
 
   file_name <- str_glue("Output/Descriptives/Scatter_{s}.png") 
 
@@ -218,17 +227,18 @@ for (s in all_stations[-1]) {
     scatter_matrix,
     filename = file_name,
     res = 300,
-    width = 20,
-    height = 15,
+    width = 25,
+    height = 23,
     units = 'cm',
     scaling = 0.9,
     device = ragg::agg_png
   )
+}
 
 ## Distribution plot ----
 
 data_den <- date_series |>
-  select(stat_aux, all_of(vars)) |>
+  select(stat_aux, all_of(vars[1:6])) |> # Only original vars
   drop_na() |> 
   pivot_longer(-stat_aux, names_to = "var", values_to = "value") |>
   mutate(
@@ -279,7 +289,8 @@ g2 <- data_den |>
   )
 
 distribution_plot <- ggarrange(g2, g1, common.legend = TRUE)
-
+distribution_plot
+ 
 ggsave(
   distribution_plot,
   filename = "Output/Descriptives/Distribution_contaminant_station.png",
@@ -301,7 +312,7 @@ chile$color <- "gray50"
 santiago$color <- "white"
 
 america_centroids <- st_centroid(america) |>
-  mutate(long = st_coordinates(.)[,1], lat = st_coordinates(.)[,2]) |> 
+  mutate(long = st_coordinates(geometry)[,1], lat = st_coordinates(geometry)[,2]) |> 
   filter(!iso_a3 %in% c("FLK", "CHL"))
 
 base_map <- ggplot() +
@@ -315,7 +326,7 @@ base_map <- ggplot() +
   color = "red", size = 1, shape = 21, fill = "red") +
   scale_fill_manual(values = c("gray80", "gray50", "white")) +
   #annotation_scale(location = "bl", width_hint = 0.4, text_cex = 0.6, tick_height = 0.3) +
-  labs(x=NULL, y=NULL, title = "A.") +
+  labs(x=NULL, y=NULL, title = NULL) + # "A."
   theme_light() +
   theme(
       plot.title = element_text(size = 16),
@@ -372,6 +383,15 @@ ggsave(
   scaling = 1,
   device = ragg::agg_png) 
 
+ggsave(base_map,
+  filename = paste0("Output/Descriptives/MAP_LA.png"), 
+  res = 300,
+  width = 20,
+  height = 25,
+  units = 'cm',
+  scaling = 1,
+  device = ragg::agg_png) 
+
 stgo <- mapa_comunas |>
   filter(codigo_region == 13) |>
   left_join(
@@ -395,7 +415,7 @@ stat_points <- stgo |>
   geom_sf(data = points, aes(shape=stat_aux, color = stat_aux), size = 2) + #shape=stat_aux
   scale_color_manual(values =  brewer.pal(11, "Paired")) +
   scale_shape_manual(values = rep(17,11)) +
-  labs(y=NULL, x=NULL, title = "B.") +
+  labs(y=NULL, x=NULL, title = NULL) + # "B."
   theme_light() +
   theme(
     legend.position = "bottom", 
@@ -419,7 +439,24 @@ ggsave(stat_points,
   scaling = 0.8,
   device = ragg::agg_png)  
 
-    
+map_plot_stat <- base_map + 
+  inset_element(stat_points + 
+                geom_sf(data = points, aes(shape=stat_aux, color = stat_aux), size = 1.5) + 
+                labs(title = "SANTIAGO") +
+                theme(legend.position = "none",
+                      plot.title = element_text(hjust = 0.5, face = "bold")), 
+                left = -0.1, 
+                bottom = 0.13, 
+                right = 0.6, 
+                top = 0.5)
 
+map_plot_stat
 
-  
+ggsave(map_plot_stat,
+  filename = paste0("Output/", "Descriptives/", "MAP_station_full", ".png"), 
+  res = 300,
+  width = 18,
+  height = 15,
+  units = 'cm',
+  scaling = 0.8,
+  device = ragg::agg_png)   

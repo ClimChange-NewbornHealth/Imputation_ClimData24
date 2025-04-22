@@ -240,3 +240,48 @@ make_upset_plot <- function(df, station_label = "All") {
   
   return(p)
 }
+
+## Smooth plot
+
+my_smooth <- function(data, mapping, ...) {
+  ggplot(data = data, mapping = mapping) +
+    geom_point(color = I("gray70"), alpha=0.5, size=0.05) + 
+    geom_smooth(method = "lm", color = I("gray30"), ...)
+}
+
+my_cor <- function(data, mapping, method = "pearson", use = "complete.obs",
+                   ndp = 2,  # número de decimales
+                   txt_size = 4,  # tamaño del texto de correlación
+                   ...) {
+  x <- eval_data_col(data, mapping$x)
+  y <- eval_data_col(data, mapping$y)
+  
+  ct <- cor.test(x, y, method = method, use = use)
+  est <- ct$estimate
+  pval <- ct$p.value
+  
+  est_formatted <- formatC(est, digits = ndp, format = "f")
+  
+  stars <- ""
+  if (pval < 0.001) {
+    stars <- "***"
+  } else if (pval < 0.01) {
+    stars <- "**"
+  } else if (pval < 0.05) {
+    stars <- "*"
+  }
+  
+  label <- paste0(est_formatted, stars)
+  
+  ggally_text(
+    label  = label,
+    mapping = mapping,
+    xP = 0.5,
+    yP = 0.5, 
+    size = txt_size,  # tamaño del texto
+    ...
+  ) +
+    theme_void() + 
+    theme(panel.background = element_rect(fill = "white"))
+}
+
