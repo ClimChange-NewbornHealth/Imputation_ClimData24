@@ -34,18 +34,6 @@ make_dummies <- function(v, prefix = '') {
   d
 }
 
-# Function install/load packages
-install_load <- function(packages){
-  for (i in packages) {
-    if (i %in% rownames(installed.packages())) {
-      library(i, character.only=TRUE)
-    } else {
-      install.packages(i)
-      library(i, character.only = TRUE)
-    }
-  }
-}
-
 # Adjust dates and time
 adjust_dates <- function(df) {
   df %>%
