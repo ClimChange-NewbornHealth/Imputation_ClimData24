@@ -53,6 +53,6 @@ install_load(c("rio",
 install_load(c("mice",
                "VIM",
                "norm",
-               "Amelia" 
+               "missMethods" 
                ))
 
