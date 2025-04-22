@@ -1,2 +1,4 @@
 .DS_Store
 /Data/Input
+/Data/Output/Simulate_miss_data
+/Data/Output/Validation_imputation_data

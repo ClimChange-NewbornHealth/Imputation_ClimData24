@@ -1,4 +1,4 @@
-# Code 2: Descriptives series  ----
+# Code 4: Time series  ----
 
 ## Settings ----
 source("Code/0.1 Settings.R")

@@ -1,4 +1,4 @@
-# Code 2: Descriptives series imputation ----
+# Code 2: Generate Analytical data ----
 
 ## Settings ----
 source("Code/0.1 Settings.R")
