@@ -1,4 +1,4 @@
-# Code 6.7: Expectation Maximization imputation ----
+# Code 6.6: Missforest imputation ----
 
 # Short explanation: impute with the mean time series. 
 

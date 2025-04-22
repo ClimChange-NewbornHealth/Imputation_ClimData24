@@ -51,6 +51,8 @@ install_load(c("rio",
 # Imputation packages 
 
 install_load(c("mice",
-               "VIM" 
+               "VIM",
+               "norm",
+               "Amelia" 
                ))
 
