@@ -23,7 +23,7 @@ names(data_list)
 #str(data_list, max.level = 1)
 
 # Open validation data ----
-load(file=paste0("Data/Output/", "Imputation_train_data", ".RData"))
+load(file=paste0("Data/Output/", "Imputation_train_data", ".RData")) 
 
 # Imputation Components  ----
 

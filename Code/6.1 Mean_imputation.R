@@ -21,12 +21,12 @@ for (name in names(data_list)) {
   if (grepl("pm25", name)) var <- "daily_log_pm25"
   if (grepl("o3", name))   var <- "daily_log_o3"
 
-  # Extraer mecanismo y porcentaje del nombre
+  # Missing metrics
   parts <- unlist(strsplit(name, "_"))
   mech <- toupper(parts[4])
   perc <- as.numeric(parts[5])
 
-  # Calcular métricas y añadir metadatos
+  # Adjustment metrics
   res <- compute_metrics(original, imputed, var) |> 
     mutate(Variable = var, Mechanism = mech, Missing = perc)
 

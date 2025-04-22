@@ -56,6 +56,11 @@ find_best_station_year <- function(df, variable) {
 date_series |>
   filter(year>=2009 & year<=2016) |> 
   filter(!is.na(daily_pm25)) |>
+  #filter(!is.na(daily_o3)) |>
+  #filter(!is.na(daily_pm10)) |>
+  #filter(!is.na(daily_hum)) |>
+  #filter(!is.na(daily_temp)) |>
+  #filter(!is.na(daily_wspd)) |>
   group_by(station, year) |>
   summarise(non_missing = n(), .groups = "drop") |>
   arrange(desc(non_missing))
@@ -68,8 +73,12 @@ date_series |>
   arrange(desc(non_missing))
 
 # Select imputation data test
+#data_imp <- date_series |> 
+#  filter(stat_aux == "S02-Cerro Navia" & year == 2012)
+
 data_imp <- date_series |> 
-  filter(stat_aux == "S02-Cerro Navia" & year == 2012)
+  filter(year %in% 2010:2020) |> 
+  drop_na()
 
 summary(data_imp)
 glimpse(data_imp)
